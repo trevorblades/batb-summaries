@@ -38,6 +38,7 @@ for (const skater of data.skaters) {
         unsuccessfulAttempts,
       ];
     });
+
   fs.writeFileSync(
     `csv/${skater.fullName}.csv`,
     [headings, ...rows].join("\n"),
