@@ -1,4 +1,5 @@
 const { data } = require("./data.json");
+const { data: tricksData } = require("./tricks.json");
 const fs = require("fs");
 
 const headings = [
@@ -9,6 +10,16 @@ const headings = [
   "Successful attempts",
   "Unsuccessful attempts",
 ];
+
+function reduceAttempts(attempts) {
+  return attempts.reduce(
+    (acc, attempt) => {
+      acc[Number(attempt.successful)]++;
+      return acc;
+    },
+    [0, 0]
+  );
+}
 
 for (const skater of data.skaters) {
   const rows = skater.games
@@ -21,13 +32,7 @@ for (const skater of data.skaters) {
         (attempt) => attempt.skater.id === skater.id
       );
 
-      const [unsuccessfulAttempts, successfulAttempts] = attempts.reduce(
-        (acc, attempt) => {
-          acc[Number(attempt.successful)]++;
-          return acc;
-        },
-        [0, 0]
-      );
+      const [unsuccessfulAttempts, successfulAttempts] = reduceAttempts(attempts);
 
       return [
         game.opponent.fullName,
@@ -45,3 +50,22 @@ for (const skater of data.skaters) {
     "utf-8"
   );
 }
+
+
+const trickRows = tricksData.tricks.map(trick => {
+  const [unsuccessfulAttempts, successfulAttempts] = reduceAttempts(trick.attempts);
+  return [
+    trick.name,
+    successfulAttempts,
+    unsuccessfulAttempts
+  ];
+});
+
+fs.writeFileSync(
+  `tricks.csv`,
+  [
+    ['Trick name', 'Successful attempts', 'Unsuccessful attempts'],
+    ...trickRows
+  ].join('\n'),
+  'utf-8'
+)
